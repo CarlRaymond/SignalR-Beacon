@@ -6,6 +6,28 @@
 
 <div id="map"></div>
 
+<div>
+	<h2>Messages</h2>
+	<ul id="messages"></ul>
+</div>
+<input type="text" id="outgoing-message" />
+<input type="button" id="broadcast" value="Broadcast" />
+<script type="text/javascript" src="Scripts/jquery.signalR-0.5.3.min.js" />
+<script type="text/javascript">
+	$(function () {
+		var tracker = $.connection.tracker;
+
+		tracker.addMessage = function (message) {
+			$("#messages").append("<li>" + message + "</li>");
+		}
+
+		$("#broadcast").click(function () {
+			tracker.send($("#outgoing-message").val());
+		});
+
+		$.connection.hub.start();
+	});
+</script>
 <script type="text/javascript">
 	var map = L.map('map').setView([42.738187, -84.484571], 13);
 	L.tileLayer('http://{s}.tile.cloudmade.com/173d9333f9c7446e9448e1511f5084d1/50838/256/{z}/{x}/{y}.png', {
