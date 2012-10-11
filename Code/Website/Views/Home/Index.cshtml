@@ -8,7 +8,7 @@
 
 <div>
 	<h2>Messages</h2>
-	<ul id="messages"></ul>
+	<ol id="messages"></ol>
 </div>
 <input type="text" id="messagebox" />
 <input type="button" id="send" value="Broadcast" />
@@ -71,6 +71,8 @@
 
 			//var location = new L.LatLng(position.coords.latitude, position.coords.longitude);
 			//var marker = new L.marker(location, { title: "Me!" }).addTo(map);
+
+
 		};
 
 		var error = function (error) {
@@ -83,7 +85,7 @@
 
 			alert("Error: " + errorTypes[error.code]);
 		};
-		//navigator.geolocation.getCurrentPosition(success, error);
-		navigator.geolocation.watchPosition(success, error, { enableHighAccuracy: true, maximumAge: 600000 });
+		setInterval(navigator.geolocation.getCurrentPosition(success, error, { enableHighAccuracy: true, maximumAge: 60000 }), 20000);
+		//navigator.geolocation.watchPosition(success, error, { enableHighAccuracy: true, maximumAge: 600000 });
 	});
 </script>
