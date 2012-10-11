@@ -64,7 +64,7 @@
 
 
 		var success = function (position) {
-			alert("You at lat: " + position.coords.latitude + " lon: " + position.coords.longitude + " accuracy: " + position.coords.accuracy);
+			//alert("You at lat: " + position.coords.latitude + " lon: " + position.coords.longitude + " accuracy: " + position.coords.accuracy);
 
 			var report = { Latitude: position.coords.latitude, Longitude: position.coords.longitude, Accuracy: position.coords.accuracy };
 			$.connection.tracker.sendLocation(report);
