@@ -16,16 +16,43 @@
 <script type="text/javascript" src="@Url.Content("/signalr/hubs")"></script>
 <script type="text/javascript">
 	$(function () {
+		"use strict";
+
+		var map = L.map('map').setView([42.738187, -84.484571], 13);
+		L.tileLayer('http://{s}.tile.cloudmade.com/173d9333f9c7446e9448e1511f5084d1/50838/256/{z}/{x}/{y}.png', {
+			attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
+			maxZoom: 18,
+			keyboard: true
+		}).addTo(map);
+
+		var markers = {};
+
+		var updateMarker = function (report) {
+			var location = new L.LatLng(report.Latitude, report.Longitude);
+			var marker = markers[report.ID];
+			if (marker === undefined) {
+				marker = new L.marker(location, { title: report.ID });
+				marker.addTo(map);
+				markers[report.ID] = marker;
+			}
+			else {
+				marker.setLatLng(location);
+			}
+		};
+
 		var tracker = $.connection.tracker;
 
-		tracker.addMessage = function (message, id) {
+		var addMessage = function (message, id) {
 			$("#messages").append("<li><em>" + id + "</em>: " + message + "</li>");
 		}
+		tracker.addMessage = addMessage;
 
-		tracker.locationUpdate = function (report) {
-			var msg = ["Lat: ", report.Latitude, ", Lon: " + report.Longitude].join("");
+		var locationUpdate = function (report) {
+			var msg = ["Lat: ", report.Latitude, ", Lon: " + report.Longitude, " at time ", report.timestamp].join("");
 			tracker.addMessage(msg, report.ID);
+			updateMarker(report);
 		}
+		tracker.locationUpdate = locationUpdate;
 
 		$("#send").click(function () {
 			tracker.sendMessage($("#messagebox").val());
@@ -33,26 +60,17 @@
 
 		$.connection.hub.start()
 			.done(function () { tracker.sendMessage("Connected!"); })
-			.fail(function () { tracker.addMessage("Could not connect."); });
-	});
-</script>
-<script type="text/javascript">
-	var map = L.map('map').setView([42.738187, -84.484571], 13);
-	L.tileLayer('http://{s}.tile.cloudmade.com/173d9333f9c7446e9448e1511f5084d1/50838/256/{z}/{x}/{y}.png', {
-		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://cloudmade.com">CloudMade</a>',
-		maxZoom: 18,
-		keyboard: true
-	}).addTo(map);
+			.fail(function () { addMessage("Could not connect."); });
 
-	(function () {
+
 		var success = function (position) {
 			alert("You at lat: " + position.coords.latitude + " lon: " + position.coords.longitude + " accuracy: " + position.coords.accuracy);
 
 			var report = { Latitude: position.coords.latitude, Longitude: position.coords.longitude, Accuracy: position.coords.accuracy };
 			$.connection.tracker.sendLocation(report);
 
-			var location = new L.LatLng(position.coords.latitude, position.coords.longitude);
-			var marker = new L.marker(location, { title: "Me!" }).addTo(map);
+			//var location = new L.LatLng(position.coords.latitude, position.coords.longitude);
+			//var marker = new L.marker(location, { title: "Me!" }).addTo(map);
 		};
 
 		var error = function (error) {
@@ -65,6 +83,7 @@
 
 			alert("Error: " + errorTypes[error.code]);
 		};
-		navigator.geolocation.getCurrentPosition(success, error);
-	})();
+		//navigator.geolocation.getCurrentPosition(success, error);
+		navigator.geolocation.watchPosition(success, error, { enableHighAccuracy: true, maximumAge: 600000 });
+	});
 </script>
