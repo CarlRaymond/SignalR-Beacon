@@ -10,23 +10,30 @@
 	<h2>Messages</h2>
 	<ul id="messages"></ul>
 </div>
-<input type="text" id="outgoing-message" />
-<input type="button" id="broadcast" value="Broadcast" />
-<script type="text/javascript" src="Scripts/jquery.signalR-0.5.3.min.js"></script>
-<script type="text/javascript" src="/signalr/hubs"></script>
+<input type="text" id="messagebox" />
+<input type="button" id="send" value="Broadcast" />
+<script type="text/javascript" src="@Url.Content("Scripts/jquery.signalR-0.5.3.min.js")"></script>
+<script type="text/javascript" src="@Url.Content("/signalr/hubs")"></script>
 <script type="text/javascript">
 	$(function () {
 		var tracker = $.connection.tracker;
 
-		tracker.addMessage = function (message) {
-			$("#messages").append("<li>" + message + "</li>");
+		tracker.addMessage = function (message, id) {
+			$("#messages").append("<li><em>" + id + "</em>: " + message + "</li>");
 		}
 
-		$("#broadcast").click(function () {
-			tracker.send($("#outgoing-message").val());
+		tracker.locationUpdate = function (report) {
+			var msg = ["Lat: ", report.Latitude, ", Lon: " + report.Longitude].join("");
+			tracker.addMessage(msg, report.ID);
+		}
+
+		$("#send").click(function () {
+			tracker.sendMessage($("#messagebox").val());
 		});
 
-		$.connection.hub.start();
+		$.connection.hub.start()
+			.done(function () { tracker.sendMessage("Connected!"); })
+			.fail(function () { tracker.addMessage("Could not connect."); });
 	});
 </script>
 <script type="text/javascript">
@@ -40,6 +47,9 @@
 	(function () {
 		var success = function (position) {
 			alert("You at lat: " + position.coords.latitude + " lon: " + position.coords.longitude + " accuracy: " + position.coords.accuracy);
+
+			var report = { Latitude: position.coords.latitude, Longitude: position.coords.longitude, Accuracy: position.coords.accuracy };
+			$.connection.tracker.sendLocation(report);
 
 			var location = new L.LatLng(position.coords.latitude, position.coords.longitude);
 			var marker = new L.marker(location, { title: "Me!" }).addTo(map);
