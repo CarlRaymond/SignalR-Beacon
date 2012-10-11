@@ -1,5 +1,0 @@
-#NuGet packages not in repo.  Just repositories.config.
-!/Code/packages/
-/Code/packages/*
-!/Code/packages/repositories.config
-
