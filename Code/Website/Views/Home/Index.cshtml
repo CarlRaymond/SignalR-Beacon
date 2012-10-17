@@ -4,12 +4,13 @@
 }
 <h1>Here's a Map</h1>
 
+<div id="messages">
+	<h2>Messages</h2>
+	<ol></ol>
+</div>
+
 <div id="map"></div>
 
-<div>
-	<h2>Messages</h2>
-	<ol id="messages"></ol>
-</div>
 <input type="text" id="messagebox" />
 <input type="button" id="send" value="Broadcast" />
 <script type="text/javascript" src="@Url.Content("~/Scripts/jquery.signalR-0.5.3.min.js")"></script>
@@ -40,6 +41,8 @@
 			}
 		};
 
+		var updateInterval = 20000;
+
 		var tracker = $.connection.tracker;
 
 		var addMessage = function (message, id) {
@@ -59,7 +62,7 @@
 		});
 
 		$.connection.hub.start()
-			.done(function () { tracker.sendMessage("Connected!"); })
+			.done(function () { tracker.sendMessage("Connected!"); startUpdate(); })
 			.fail(function () { addMessage("Could not connect."); });
 
 
@@ -72,6 +75,7 @@
 			//var location = new L.LatLng(position.coords.latitude, position.coords.longitude);
 			//var marker = new L.marker(location, { title: "Me!" }).addTo(map);
 
+			setTimeout(startUpdate, updateInterval);
 
 		};
 
@@ -85,7 +89,10 @@
 
 			alert("Error: " + errorTypes[error.code]);
 		};
-		setInterval(navigator.geolocation.getCurrentPosition(success, error, { enableHighAccuracy: true, maximumAge: 60000 }), 20000);
-		//navigator.geolocation.watchPosition(success, error, { enableHighAccuracy: true, maximumAge: 600000 });
+
+		var startUpdate = function () {
+			navigator.geolocation.getCurrentPosition(success, error, { enableHighAccuracy: true, maximumAge: 60000 });
+		};
+
 	});
 </script>

@@ -4,4 +4,10 @@
 div#map
 {
 	height: 600px;
+	width: 500px;
+}
+
+div#messages
+{
+	float: right;
 }
