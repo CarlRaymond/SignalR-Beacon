@@ -46,13 +46,15 @@
 		var tracker = $.connection.tracker;
 
 		var addMessage = function (message, id) {
-			$("#messages").append("<li><em>" + id + "</em>: " + message + "</li>");
+			$("#messages ol li:gt(8)").remove();
+			$("#messages ol").prepend("<li><em>" + id + "</em>: " + message + "</li>");
 		}
 		tracker.addMessage = addMessage;
 
 		var locationUpdate = function (report) {
 			var msg = ["Lat: ", report.Latitude, ", Lon: " + report.Longitude, " at time ", report.timestamp].join("");
 			tracker.addMessage(msg, report.ID);
+			$("#audio-incoming")[0].play();
 			updateMarker(report);
 		}
 		tracker.locationUpdate = locationUpdate;
@@ -96,3 +98,7 @@
 
 	});
 </script>
+<audio id="audio-incoming" aria-hidden="true" preload="auto">
+	<source type="audio/mp3" src="@Url.Content("~/Content/IncomingMessage.mp3")" />
+	<source type="audio/ogg" src="@Url.Content("~/Content/IncomingMessage.ogg")" />
+</audio>
